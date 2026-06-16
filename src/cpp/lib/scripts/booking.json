@@ -1,0 +1,25 @@
+[
+    {
+        "mimeType": "text/plain",
+        "filter": [ { "field": "From", "match": "@booking.com", "mimeType": "message/rfc822", "scope": "Ancestors" } ],
+        "script": "booking.js"
+    },
+    {
+        "mimeType": "text/html",
+        "filter": [ { "field": "From", "match": "@booking.com", "mimeType": "message/rfc822", "scope": "Ancestors" } ],
+        "script": "booking.js",
+        "function": "parseHtml"
+    },
+    {
+        "mimeType": "text/html",
+        "filter": [ { "field": "From", "match": "@booking.com", "mimeType": "message/rfc822", "scope": "Ancestors" } ],
+        "script": "booking.js",
+        "function": "parseHtmlAlternative"
+    },
+    {
+        "mimeType": "application/pdf",
+        "filter": [ { "mimeType": "text/plain", "match": "This print version of your confirmation contains the most important information about your booking. It can be used to check in", "scope": "Descendants" } ],
+        "script": "booking.js",
+        "function": "parsePdf"
+    }
+]

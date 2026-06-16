@@ -1,0 +1,12 @@
+{
+    "filter": [
+        {
+            "match": "Sprzedawca:*.*NIP:*.*\nWystawiono:*.*\nData wydruku:*.*",
+            "mimeType": "text/plain",
+            "scope": "Descendants"
+        }
+    ],
+    "function": "extractPdfTicket",
+    "mimeType": "application/pdf",
+    "script": "koleo.js"
+}

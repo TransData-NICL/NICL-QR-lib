@@ -1,0 +1,32 @@
+[{
+    "filter": [
+        { "field": "From", "match": "@iberia.com", "mimeType": "message/rfc822", "scope": "Ancestors" }
+    ],
+    "script": "iberia.js",
+    "mimeType": "text/plain"
+},
+{
+    "filter": [
+        {
+            "field": "airlineDesignatorOfBoardingPassIssuer",
+            "match": "IB",
+            "mimeType": "internal/iata-bcbp",
+            "scope": "Descendants"
+        }
+    ],
+    "function": "extractBoardingPass",
+    "mimeType": "application/pdf",
+    "script": "iberia.js"
+}, {
+    "mimeType": "application/vnd.apple.pkpass",
+    "filter": [ { "field": "passTypeIdentifier", "match": "pass.com.iberia.MobileBoardingPassType", "mimeType": "application/vnd.apple.pkpass", "scope": "Current" } ],
+    "script": "iberia.js",
+    "function": "extractPkPass"
+},{
+    "filter": [
+        { "match": "^\\s*IBERIA LAE S.A.", "mimeType": "text/plain", "scope": "Children" }
+    ],
+    "script": "iberia.js",
+    "mimeType": "application/pdf",
+    "function": "extractReservation"
+}]

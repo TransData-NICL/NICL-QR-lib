@@ -1,0 +1,35 @@
+[
+    {
+        "mimeType": "text/plain",
+        "filter": [
+            { "field": "From", "match": "express@studentagency.cz", "mimeType": "message/rfc822", "scope": "Ancestors" },
+            { "field": "From", "match": "info@regiojet.cz", "mimeType": "message/rfc822", "scope": "Ancestors" }
+        ],
+        "script": "regiojet.js",
+        "function": "main"
+    },
+    {
+        "mimeType": "internal/event",
+        "filter": [ { "field": "uid", "match": "@regiojet.cz", "mimeType": "internal/event", "scope": "Current" } ],
+        "script": "regiojet.js",
+        "function": "parseEvent"
+    },
+    {
+        "mimeType": "application/vnd.apple.pkpass",
+        "filter": [ { "field": "passTypeIdentifier", "match": "pass\\.distribusion", "mimeType": "application/vnd.apple.pkpass", "scope": "Current" } ],
+        "script": "regiojet.js",
+        "function": "parseDistribusionPkPass"
+    },
+    {
+        "mimeType": "application/vnd.apple.pkpass",
+        "filter": [ { "field": "passTypeIdentifier", "match": "pass.cz.sa.ybus", "mimeType": "application/vnd.apple.pkpass", "scope": "Current" } ],
+        "script": "regiojet.js",
+        "function": "parsePkPass"
+    },
+    {
+        "mimeType": "application/pdf",
+        "filter": [ { "match": "^\\d;.*;\\d{10}$", "mimeType": "text/plain", "scope": "Descendants" } ],
+        "script": "regiojet.js",
+        "function": "parseSeatReservationPdf"
+    }
+]

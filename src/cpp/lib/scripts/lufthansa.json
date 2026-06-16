@@ -1,0 +1,41 @@
+[
+    {
+        "filter": [
+            {
+                "field": "passTypeIdentifier",
+                "match": "pass.com.lufthansa.mbp",
+                "mimeType": "application/vnd.apple.pkpass",
+                "scope": "Current"
+            }
+        ],
+        "function": "main",
+        "mimeType": "application/vnd.apple.pkpass",
+        "script": "lufthansa-pkpass.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "uid",
+                "match": "@booking.lufthansa.com$",
+                "mimeType": "internal/event",
+                "scope": "Current"
+            }
+        ],
+        "function": "extractEvent",
+        "mimeType": "internal/event",
+        "script": "lufthansa.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "author",
+                "match": "Lufthansa",
+                "mimeType": "application/pdf",
+                "scope": "Ancestors"
+            }
+        ],
+        "function": "extractBoardingPass",
+        "mimeType": "internal/iata-bcbp",
+        "script": "lufthansa.js"
+    }
+]

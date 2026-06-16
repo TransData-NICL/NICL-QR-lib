@@ -1,0 +1,28 @@
+[
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "@vueling.com",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            }
+        ],
+        "function": "parseHtmlBooking",
+        "mimeType": "text/html",
+        "script": "vueling.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "operatingCarrierDesignator",
+                "match": "VY",
+                "mimeType": "internal/iata-bcbp",
+                "scope": "Descendants"
+            }
+        ],
+        "function": "parsePdfBoardingPass",
+        "mimeType": "application/pdf",
+        "script": "vueling.js"
+    }
+]

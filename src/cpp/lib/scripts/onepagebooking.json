@@ -1,0 +1,38 @@
+[{
+    "filter": [
+        {
+            "field": "From",
+            "match": "@onepagebooking.com",
+            "mimeType": "message/rfc822",
+            "scope": "Ancestors"
+        }
+    ],
+    "function": "main",
+    "mimeType": "text/plain",
+    "script": "onepagebooking.js"
+},
+{
+    "filter": [
+        {
+            "field": "passTypeIdentifier",
+            "match": "pass.onepagebooking.com",
+            "mimeType": "application/vnd.apple.pkpass",
+            "scope": "Current"
+        }
+    ],
+    "function": "parsePkPass",
+    "mimeType": "application/vnd.apple.pkpass",
+    "script": "onepagebooking.js"
+},
+{
+    "filter": [
+        {
+            "match": "^https://onepagebooking.com/",
+            "mimeType": "text/plain",
+            "scope": "Descendants"
+        }
+    ],
+    "function": "parsePdf",
+    "mimeType": "application/pdf",
+    "script": "onepagebooking.js"
+}]

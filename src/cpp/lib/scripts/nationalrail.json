@@ -1,0 +1,37 @@
+[{
+    "filter": [
+        {
+            "match": "^06[A-Z0-9]{9}00[A-Z]{2}",
+            "mimeType": "text/plain",
+            "scope": "Current"
+        }
+    ],
+    "function": "parseRSP6",
+    "mimeType": "text/plain",
+    "script": "nationalrail.js"
+},
+{
+    "filter": [
+        {
+            "match": "^06[A-Z0-9]{9}00[A-Z]{2}",
+            "mimeType": "text/plain",
+            "scope": "Descendants"
+        }
+    ],
+    "function": "parseTicket",
+    "mimeType": "application/pdf",
+    "script": "nationalrail.js"
+},
+{
+    "filter": [
+        {
+            "field": "passTypeIdentifier",
+            "match": "pass.uk.co.lner.cbe",
+            "mimeType": "application/vnd.apple.pkpass",
+            "scope": "Current"
+        }
+    ],
+    "function": "parsePass",
+    "mimeType": "application/vnd.apple.pkpass",
+    "script": "nationalrail.js"
+}]

@@ -1,0 +1,34 @@
+[{
+    "filter": [
+        {
+            "match": "^PNR:\\d{10},TRAIN:",
+            "mimeType": "text/plain",
+            "scope": "Current"
+        }
+    ],
+    "function": "extractSmsTicket",
+    "script": "irctc.js",
+    "mimeType": "text/plain"
+},{
+    "filter": [
+        {
+            "match": "^PNR No.:\\d{10},\\nTXN ID:",
+            "mimeType": "text/plain",
+            "scope": "Current"
+        }
+    ],
+    "function": "extractQrTicket",
+    "script": "irctc.js",
+    "mimeType": "text/plain"
+},{
+    "filter": [
+        {
+            "match": "^PNR No.:\\d{10},\\nTXN ID:",
+            "mimeType": "text/plain",
+            "scope": "Descendants"
+        }
+    ],
+    "function": "extractPdfTicket",
+    "script": "irctc.js",
+    "mimeType": "application/pdf"
+}]

@@ -1,0 +1,227 @@
+[
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "e-billet@sncf.fr",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            },
+            {
+                "match": "^i0CV",
+                "mimeType": "text/plain",
+                "scope": "Descendants"
+            }
+        ],
+        "function": "parsePdf",
+        "mimeType": "application/pdf",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "match": "^i[01]CV",
+                "mimeType": "text/plain",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseSncfBarcode",
+        "mimeType": "text/plain",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "UNITTEST-e-billet@sncf.fr",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            }
+        ],
+        "function": "parseSncfPdfText",
+        "mimeType": "text/plain",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "match": "^2200",
+                "mimeType": "application/octet-stream",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseSecutix",
+        "mimeType": "application/octet-stream",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "match": "^2200",
+                "mimeType": "application/octet-stream",
+                "scope": "Descendants"
+            }
+        ],
+        "function": "parseSecutixPdf",
+        "mimeType": "application/pdf",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "oui.sncf",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            },
+            {
+                "field": "From",
+                "match": "noreply@connect.sncf",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            }
+        ],
+        "function": "parseOuiEmail",
+        "mimeType": "text/html",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "ne-pas-repondre@pasngr.ouigo.com",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            },
+            {
+                "match": "^0[A-Za-z0-9=+\\/]{172}$",
+                "mimeType": "text/plain",
+                "scope": "Descendants"
+            }
+        ],
+        "function": "parseOuigoTicket",
+        "mimeType": "application/pdf",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "@ter-sncf.fr",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            },
+            {
+                "field": "From",
+                "match": "@ter.fr",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            }
+        ],
+        "function": "parseTerConfirmation",
+        "mimeType": "text/html",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "ne-pas-repondre@pasngr.ouigo.com",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            }
+        ],
+        "function": "parseOuigoConfirmation",
+        "mimeType": "text/html",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "match": "^h0FV",
+                "mimeType": "text/plain",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseSncfCarte",
+        "mimeType": "text/plain",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "match": "^h0FV",
+                "mimeType": "text/plain",
+                "scope": "Descendants"
+            }
+        ],
+        "function": "parseSncfCartePdf",
+        "mimeType": "application/pdf",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "level2SignedData.level1Data.securityProviderNum",
+                "match": "1187",
+                "mimeType": "internal/uic-dosipas",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseSncfDosipas",
+        "mimeType": "internal/uic-dosipas",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "level2SignedData.level1Data.securityProviderNum",
+                "match": "1187",
+                "mimeType": "internal/uic-dosipas",
+                "scope": "Descendants"
+            }
+        ],
+        "function": "parseSncfDosipasPdf",
+        "mimeType": "application/pdf",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "url",
+                "match": "sncf-connect.com/.*TRIP_IMPORT",
+                "mimeType": "internal/event",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseEvent",
+        "mimeType": "internal/event",
+        "script": "sncf.js"
+    },
+    {
+        "filter": [
+            {
+                "mimeType": "internal/era-ssb",
+                "field": "issuerCode",
+                "match": "1187",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseSSB",
+        "script": "sncf.js",
+        "mimeType": "internal/era-ssb"
+    },
+    {
+        "filter": [
+            {
+                "field": "url",
+                "match": "^https://www.sncf-connect.com/bff/api/v1/trips/trips-by-criteria",
+                "mimeType": "internal/http-response",
+                "scope": "Parent"
+            }
+        ],
+        "function": "parseOnlineTicket",
+        "mimeType": "application/ld+json",
+        "script": "sncf-online-ticket.js"
+    }
+]

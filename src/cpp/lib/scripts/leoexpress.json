@@ -1,0 +1,39 @@
+[{
+    "filter": [
+        {
+            "field": "organizer.name",
+            "match": "Leo Express",
+            "mimeType": "internal/event",
+            "scope": "Current"
+        }
+    ],
+    "function": "extractEvent",
+    "mimeType": "internal/event",
+    "script": "leoexpress.js"
+},
+{
+    "filter": [
+        {
+            "field": "title",
+            "match": "^Leo Express",
+            "mimeType": "application/pdf",
+            "scope": "Current"
+        }
+    ],
+    "function": "extractPdf",
+    "mimeType": "application/pdf",
+    "script": "leoexpress.js"
+},
+{
+    "filter": [
+        {
+            "field": "passTypeIdentifier",
+            "match": "pass.com.leoexpress.leoexpress",
+            "mimeType": "application/vnd.apple.pkpass",
+            "scope": "Current"
+        }
+    ],
+    "function": "extractPkpass",
+    "mimeType": "application/vnd.apple.pkpass",
+    "script": "leoexpress.js"
+}]

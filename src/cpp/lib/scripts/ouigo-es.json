@@ -1,0 +1,24 @@
+[{
+    "filter": [
+        {
+            "match": "^\\d{25}\\/\\d{2}\\/\\d{6}:\\d{16}",
+            "mimeType": "text/plain",
+            "scope": "Current"
+        }
+    ],
+    "function": "parseBarcode",
+    "mimeType": "text/plain",
+    "script": "ouigo-es.js"
+},
+{
+    "filter": [
+        {
+            "match": "^\\d{25}\\/\\d{2}\\/\\d{6}:\\d{16}",
+            "mimeType": "text/plain",
+            "scope": "Descendants"
+        }
+    ],
+    "function": "parsePdf",
+    "mimeType": "application/pdf",
+    "script": "ouigo-es.js"
+}]

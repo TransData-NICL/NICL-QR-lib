@@ -1,0 +1,12 @@
+Updating the airport database
+=============================
+
+(1) Configure with -DOSM_PLANT_DIR=<dir> pointing to a location
+with plenty of free space for a full OSM DB download (200+GB).
+
+(2) Run the code generator
+
+Run `make rebuild-knowledgedb` in the build dir of this folder.
+
+SPDX-FileCopyrightText: none
+SPDX-License-Identifier: CC0-1.0

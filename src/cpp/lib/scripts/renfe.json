@@ -1,0 +1,49 @@
+[{
+    "filter": [
+        {
+            "match": "^\\d{29}.*(\\S{6}(\\.\\.\\S{5}| +))?$",
+            "mimeType": "text/plain",
+            "scope": "Descendants"
+        }
+    ],
+    "function": "parsePdf",
+    "script": "renfe.js",
+    "mimeType": "application/pdf"
+}, {
+    "filter": [
+        {
+            "field": "passTypeIdentifier",
+            "match": "pass.com.renfe-RenfeTicket",
+            "mimeType": "application/vnd.apple.pkpass",
+            "scope": "Current"
+        }
+    ],
+    "function": "parsePkPass",
+    "mimeType": "application/vnd.apple.pkpass",
+    "script": "renfe.js"
+},
+{
+    "filter": [
+        {
+            "match": "^\\d{29}.*(\\S{6}(\\.\\.\\S{5}| +))?$",
+            "mimeType": "text/plain",
+            "scope": "Current"
+        }
+    ],
+    "function": "parseBarcode",
+    "script": "renfe.js",
+    "mimeType": "text/plain"
+},
+{
+    "filter": [
+        {
+            "field": "carrierId",
+            "match": "1071",
+            "mimeType": "internal/uic9183",
+            "scope": "Descendants"
+        }
+    ],
+    "function": "parseInternationalPdf",
+    "script": "renfe.js",
+    "mimeType": "application/pdf"
+}]

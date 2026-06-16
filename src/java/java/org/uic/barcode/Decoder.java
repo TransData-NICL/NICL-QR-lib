@@ -1,0 +1,507 @@
+package org.uic.barcode;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.zip.DataFormatException;
+
+import org.uic.barcode.dynamicContent.api.IUicDynamicContent;
+import org.uic.barcode.dynamicFrame.Constants;
+import org.uic.barcode.dynamicFrame.api.DynamicFrameCoder;
+import org.uic.barcode.dynamicFrame.api.IData;
+import org.uic.barcode.dynamicFrame.api.IDynamicFrame;
+import org.uic.barcode.dynamicFrame.api.ILevel1Data;
+import org.uic.barcode.dynamicFrame.api.ILevel2Data;
+import org.uic.barcode.ssbFrame.SsbFrame;
+import org.uic.barcode.staticFrame.StaticFrame;
+import org.uic.barcode.staticFrame.UFLEXDataRecord;
+import org.uic.barcode.staticFrame.UTLAYDataRecord;
+import org.uic.barcode.staticFrame.ticketLayoutBarcode.TicketLayout;
+import org.uic.barcode.ticket.EncodingFormatException;
+import org.uic.barcode.ticket.UicRailTicketCoder;
+import org.uic.barcode.ticket.api.spec.IUicRailTicket;
+import org.uic.barcode.utils.SecurityUtils;
+
+
+/**
+ * The Class Decoder.
+ * 
+ * signature validation and decoding of UIC bar codes
+ * 
+ */
+public class Decoder {
+	
+	
+	/** The dynamic frame. */
+	private IDynamicFrame dynamicFrame = null;
+	
+	/** The static frame. */
+	private StaticFrame staticFrame = null;
+	
+	/** The ssb frame. */
+	private SsbFrame ssbFrame = null;
+	
+	/** The uic ticket coder. */
+	private UicRailTicketCoder uicTicketCoder = null;
+	
+	/** The uic ticket. */
+	private IUicRailTicket uicTicket = null;
+	
+	/** The layout. */
+	private TicketLayout layout = null;
+	
+	/** The data. */
+	byte[] data = null;
+	
+	private Provider defaultProvider = null;
+	
+	
+	public Provider getDefaultProvider() {
+		return defaultProvider;
+	}
+
+	public void setDefaultProvider(Provider defaultProvider) {
+		this.defaultProvider = defaultProvider;
+	}
+
+	/**
+	 * Instantiates a new decoder.
+	 *
+	 * @param data the data
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws EncodingFormatException the encoding format exception
+	 * @throws DataFormatException the data format exception
+	 */
+	public Decoder (byte[] data) throws IOException, EncodingFormatException, DataFormatException {
+		this.data = data;
+		
+		if (defaultProvider == null) {
+			defaultProvider = SecurityUtils.getDefaultProvider();
+		}
+		
+		decode(data);
+	}
+
+    /**
+     * Convert a signature name from the PKMW to a Java Standard Algorithm name.
+     * See the Signature section in the <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#Signature">Java Cryptography Architecture Standard Algorithm Name Documentation</a> for information about standard algorithm names.
+     *
+     * @param pkmwName The value of the `signatureAlgorithm` field in the PKMW
+     * @return The Java Standard signature algorithm name, or null when the PKMW value isn't recognised
+     */
+    public String pkmwNameToSignatureAlgorithmName(String pkmwName) {
+        switch (pkmwName) {
+            case "SHA1withDSA":
+            case "SHA1withDSA(1024,160)":
+            case "DSA_SHA1 (1024)":
+            case "SHA1-DSA (1024)":
+            case "SHA1-DSA (1024,160)":
+            case "DSA1024":
+                return "SHA1withDSA";
+            case "SHA224withDSA":
+            case "SHA224withDSA(2048,224)":
+                return "SHA224withDSA";
+            case "SHA256withDSA":
+            case "SHA256withDSA(2048,256)":
+                return "SHA256withDSA";
+            case "SHA256withECDSA":
+                return "SHA256withECDSA";
+            default:
+                return null;
+        }
+    }
+	
+	/**
+	 * Validate level 1 signature.
+	 *
+	 * @param key the public key
+	 * @return the return code indicating errors, or OK
+	 * @throws InvalidKeyException the invalid key exception
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws SignatureException the signature exception
+	 * @throws IllegalArgumentException the illegal argument exception
+	 * @throws UnsupportedOperationException the unsupported operation exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws EncodingFormatException the encoding format exception
+	 * @deprecated
+	 */
+	public int validateLevel1(PublicKey key) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException, IllegalArgumentException, UnsupportedOperationException, IOException, EncodingFormatException {
+		return validateLevel1(key,null, defaultProvider);
+	}
+	
+	/**
+	 * Validate level 1 signature.
+	 *
+	 * @param key the public key
+     * @param signatureAlgorithmName the standard name of the algorithm requested.
+     *                               See the Signature section in the <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#Signature">Java Cryptography Architecture Standard Algorithm Name Documentation</a> for information about standard algorithm names.
+     *                               Can be set to null to guess signature algorithm from signature length.
+     * @return the return code indicating errors, or OK
+	 * @throws InvalidKeyException the invalid key exception
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws SignatureException the signature exception
+	 * @throws IllegalArgumentException the illegal argument exception
+	 * @throws UnsupportedOperationException the unsupported operation exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws EncodingFormatException the encoding format exception
+	 * @deprecated
+	 */
+	public int validateLevel1(PublicKey key, String signatureAlgorithmName) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException, IllegalArgumentException, UnsupportedOperationException, IOException, EncodingFormatException {
+		return validateLevel1(key, signatureAlgorithmName, defaultProvider);
+	}
+	
+	/**
+	 * Validate level 1 signature.
+	 *
+	 * @param key the public key
+     * @param signatureAlgorithmName the standard name of the algorithm requested.
+     *                               See the Signature section in the <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#Signature">Java Cryptography Architecture Standard Algorithm Name Documentation</a> for information about standard algorithm names.
+     *                               Can be set to null to guess signature algorithm from signature length.
+	 * @param provider security provider in case a dedicated provider must be used (otherwise null)
+	 * @return the return code indicating errors, or OK
+	 * @throws InvalidKeyException the invalid key exception
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws SignatureException the signature exception
+	 * @throws IllegalArgumentException the illegal argument exception
+	 * @throws UnsupportedOperationException the unsupported operation exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws EncodingFormatException the encoding format exception
+	 */
+	public int validateLevel1(PublicKey key, String signatureAlgorithmName, Provider provider) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException, IllegalArgumentException, UnsupportedOperationException, IOException, EncodingFormatException {
+		if (!isStaticHeader(data) && dynamicFrame != null) {
+			return dynamicFrame.validateLevel1(key, provider, signatureAlgorithmName) ;
+		} else if (isSsbFrame(data) && ssbFrame != null) {
+			if (ssbFrame.verifyByAlgorithmName(key, signatureAlgorithmName, provider)) {
+				return Constants.LEVEL1_VALIDATION_OK;
+			} else {
+				return Constants.LEVEL1_VALIDATION_FRAUD;
+			}
+		} else if (staticFrame != null) {
+			if (staticFrame.verifyByAlgorithmName(key, signatureAlgorithmName, provider)) {
+				return Constants.LEVEL1_VALIDATION_OK;
+			} else {
+				return Constants.LEVEL1_VALIDATION_FRAUD;
+			}
+		}
+		return Constants.LEVEL1_VALIDATION_NO_SIGNATURE;
+	}
+	
+	/**
+	 * Validate level 2.
+	 *
+	 * @return the return code indicating errors
+	 * @deprecated
+	 */
+	public int validateLevel2() throws EncodingFormatException {
+		return validateLevel2(defaultProvider);
+	}
+
+	/**
+	 * Validate level 2.
+	 * @param prov - provider of the java security implementation in case a dedicated provider must be used
+	 * @return the return code indicating errors
+	 */
+	public int validateLevel2(Provider prov) throws EncodingFormatException {
+		if (dynamicFrame != null)
+            return dynamicFrame.validateLevel2(prov);
+        else
+            return Constants.LEVEL2_VALIDATION_NO_SIGNATURE;
+	}
+
+	
+	/**
+	 * Decode.
+	 *
+	 * @param data the byte array raw data
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws EncodingFormatException the encoding format exception
+	 * @throws DataFormatException the data format exception
+	 */
+	public void decode(byte[] data) throws IOException, EncodingFormatException, DataFormatException {
+		
+		if (!isStaticHeader(data)) {
+			try {
+				decodeDynamicFrame(data);
+			} catch (Exception e) {
+				dynamicFrame = null;
+				if (isSsbFrame(data)) {
+					decodeSsbFrame(data);
+				} else {
+					throw e;
+				}
+			} catch (AssertionError e) {
+				dynamicFrame = null;
+				if (isSsbFrame(data)) {
+					decodeSsbFrame(data);
+				} else {
+					throw new EncodingFormatException(e.getMessage());
+				}
+			}
+					
+		} else if (isStaticHeader(data)){
+			try {
+				decodeStaticFrame(data);
+			} catch (Exception e) {
+		        staticFrame = null;
+				throw e;
+			}
+		}
+	}
+	
+	private void decodeDynamicFrame(byte[] data) throws EncodingFormatException, IOException {
+		
+		dynamicFrame = DynamicFrameCoder.decode(data);
+		
+		ILevel2Data level2 = dynamicFrame.getLevel2Data();
+		
+		ILevel1Data level1 = level2.getLevel1Data();
+		
+		for (IData level1Content : level1.getData()) {
+			
+			uicTicketCoder = new UicRailTicketCoder();
+			if (level1Content.getFormat().equals("FCB1")) {
+				uicTicket = uicTicketCoder.decodeFromAsn(level1Content.getData(), 1);
+			} else if (level1Content.getFormat().equals("FCB2")) {
+				uicTicket = uicTicketCoder.decodeFromAsn(level1Content.getData(), 2);
+			} else if (level1Content.getFormat().equals("FCB3")) {
+				uicTicket = uicTicketCoder.decodeFromAsn(level1Content.getData(), 3);
+			}
+		}
+		
+	}
+	
+	private void decodeStaticFrame(byte[] data) throws EncodingFormatException, DataFormatException, IOException {
+		
+		staticFrame = new StaticFrame();
+		
+		staticFrame.decode(data);
+		
+		UFLEXDataRecord flex = staticFrame.getuFlex();
+		
+		if (flex != null) {
+			uicTicket = flex.getTicket();
+		}
+
+		UTLAYDataRecord tlay = staticFrame.getuTlay();
+		
+		if (tlay != null) {
+			layout = tlay.getLayout();
+		}
+	}
+
+	private void decodeSsbFrame(byte[] data) throws EncodingFormatException, DataFormatException, IOException {
+		
+		ssbFrame  = new SsbFrame();
+		
+		ssbFrame.decode(data);
+		
+	}
+
+	/**
+	 * Checks if is static header.
+	 *
+	 * @param data the data
+	 * @return true, if is static header
+	 */
+	private boolean isStaticHeader(byte[] data) {
+		byte[] start = "#UT".getBytes();
+		if (start[0] != data[0] || start[1]!= start[1] || start[2] != data[2]) return false;
+		return true;
+	}
+
+	/**
+	 * Checks if is ssb frame.
+	 *
+	 * @param data the data
+	 * @return true, if is static header
+	 */
+	private boolean isSsbFrame(byte[] data) {
+		if (data.length == 114) {
+			return true;
+		} 
+		return false;
+	}
+	
+	/**
+	 * Gets the uic ticket.
+	 *
+	 * @return the uic ticket
+	 */
+	public IUicRailTicket getUicTicket() {
+		return uicTicket;
+	}
+
+	/**
+	 * Gets the layout.
+	 *
+	 * @return the layout
+	 */
+	public TicketLayout getLayout() {
+		return layout;
+	}
+	
+	/*
+	 * some companies use multiple layouts in domestic travel
+	 */
+	public ArrayList<UTLAYDataRecord> getLayouts(){
+		if (staticFrame != null 
+				&& staticFrame.getLayouts()!= null 
+				&& !staticFrame.getLayouts().isEmpty()) {
+			return staticFrame.getLayouts();
+		}
+		return null;
+	}
+	
+	/**
+	 * Gets the dynamic header.
+	 *
+	 * @return the dynamic header
+	 */
+	public IDynamicFrame getDynamicFrame() {
+		return dynamicFrame;
+	}
+
+	/**
+	 * Gets the dynamic content.
+	 *
+	 * @return the dynamic header
+	 */
+	public IUicDynamicContent getDynamicContent() {
+		if (dynamicFrame == null) return null;
+		
+		return dynamicFrame.getDynamicContent();
+	}
+	
+	/**
+	 * Sets the dynamic header.
+	 *
+	 * @param dynamicHeader the new dynamic header
+	 */
+	public void setDynamicHeader(IDynamicFrame dynamicHeader) {
+		this.dynamicFrame = dynamicHeader;
+	}
+
+	/**
+	 * Gets the static frame.
+	 *
+	 * @return the static frame
+	 */
+	public StaticFrame getStaticFrame() {
+		return staticFrame;
+	}
+
+	/**
+	 * Sets the static frame.
+	 *
+	 * @param staticFrame the new static frame
+	 */
+	public void setStaticFrame(StaticFrame staticFrame) {
+		this.staticFrame = staticFrame;
+	}
+
+	public IData getLevel2Data() {
+		if (!isStaticHeader(data) && dynamicFrame != null && dynamicFrame.getLevel2Data() != null) {
+			return dynamicFrame.getLevel2Data().getLevel2Data();
+		}
+		return null;
+	}
+	
+	public byte[] getEncodedLevel1Data() throws IOException, EncodingFormatException {
+		if (!isStaticHeader(data) && dynamicFrame != null) {
+			return dynamicFrame.getLevel1DataBin();
+		} else if (staticFrame != null) {
+			return staticFrame.buildDataForSignature();
+		} else if (ssbFrame != null) {
+			return ssbFrame.getDataForSignature();
+		} else {
+			throw new EncodingFormatException("Unknown Header");
+		}		
+	}
+	
+	public byte[] getLevel1Signature() throws IOException, EncodingFormatException {
+		
+		if (!isStaticHeader(data)) {
+			return dynamicFrame.getLevel2Data().getLevel1Signature();
+		} else if (staticFrame != null) {
+			return staticFrame.getSignature();
+		} else if (ssbFrame != null) {
+			return SecurityUtils.encodeSignatureIntegerSequence(new BigInteger(ssbFrame.getSignaturePart1()), new BigInteger(ssbFrame.getSignaturePart2()));
+		} else {
+			throw new EncodingFormatException("Unknown Header");
+		}
+	}
+	
+	public String getLevel1KeyId() throws EncodingFormatException {
+		
+		if (dynamicFrame != null 
+			&& dynamicFrame.getLevel2Data() != null 
+			&& dynamicFrame.getLevel2Data().getLevel1Data() != null) {
+			return dynamicFrame.getLevel2Data().getLevel1Data().getKeyId().toString();
+		} else if (staticFrame != null) {
+			return staticFrame.getSignatureKey();
+		} else if (ssbFrame != null) {
+			return String.valueOf(ssbFrame.getHeader().getKeyId());
+		} else {
+			throw new EncodingFormatException("Unknown Header");
+		}
+		
+	}
+	
+	public String getTrimmedLevel1KeyId() throws EncodingFormatException {
+		
+		if (dynamicFrame != null 
+			&& dynamicFrame.getLevel2Data() != null 
+			&& dynamicFrame.getLevel2Data().getLevel1Data() != null) {
+			return dynamicFrame.getLevel2Data().getLevel1Data().getKeyId().toString();
+		} else if (staticFrame != null) {
+			return trimLeadingZeros(staticFrame.getSignatureKey());
+		} else if (ssbFrame != null) {
+			return String.valueOf(ssbFrame.getHeader().getKeyId());
+		} else {
+			throw new EncodingFormatException("Unknown Header");
+		}
+		
+	}
+	
+	private static String trimLeadingZeros(String source) {
+	    for (int i = 0; i < source.length(); ++i) {
+	        char c = source.charAt(i);
+	        if (c != '0') {
+	            return source.substring(i);
+	        }
+	    }
+	    return "";
+	}
+	
+	public String getLevel1SecurityProvider() throws EncodingFormatException {
+	
+		if (dynamicFrame != null 
+			&& dynamicFrame.getLevel2Data() != null 
+			&& dynamicFrame.getLevel2Data().getLevel1Data() != null) {
+			return dynamicFrame.getLevel2Data().getLevel1Data().getSecurityProvider();
+		} else if (staticFrame != null) {
+			return staticFrame.getSecurityProvider();
+		} else if (ssbFrame != null) {
+			return String.valueOf(ssbFrame.getHeader().getIssuer());
+		} else {
+			throw new EncodingFormatException("Unknown Header");
+		}
+
+	}
+
+	public SsbFrame getSsbFrame() {
+		return ssbFrame;
+	}
+
+	public void setSsbFrame(SsbFrame ssbFrame) {
+		this.ssbFrame = ssbFrame;
+	}
+	
+	
+	
+}

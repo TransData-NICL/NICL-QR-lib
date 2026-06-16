@@ -1,0 +1,17 @@
+[
+    {
+        "mimeType": "application/pdf",
+        "filter": [
+            { "field": "operatingCarrierDesignator", "match": "SK", "mimeType": "internal/iata-bcbp", "scope": "Descendants" }
+        ],
+        "script": "sas-boardingpass.js"
+    },
+    {
+        "mimeType": "application/pdf",
+        "filter": [
+            { "field": "From", "match": "no-reply@flysas.com", "mimeType": "message/rfc822", "scope": "Ancestors" },
+            { "field": "title", "match": "^Report1$", "mimeType": "application/pdf", "scope": "Current" }
+        ],
+        "script": "sas-receipt.js"
+    }
+]

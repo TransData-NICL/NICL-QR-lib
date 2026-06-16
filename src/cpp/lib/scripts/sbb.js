@@ -1,0 +1,168 @@
+/*
+   SPDX-FileCopyrightText: 2023 Volker Krause <vkrause@kde.org>
+   SPDX-License-Identifier: LGPL-2.0-or-later
+*/
+
+function readTime(stream)
+{
+    let timeStream = stream.readSubMessage();
+    return new Date(timeStream.readVarintField());
+}
+
+// see https://community.kde.org/KDE_PIM/KItinerary/SBB_Barcode
+function parseQrCode(content) {
+    let res = JsonLd.newTrainReservation();
+    res.reservedTicket.ticketToken = 'qrcodebin:' + ByteArray.toBase64(content);
+    res.reservationFor.provider.identifier = 'uic:1085';
+    let top = ByteArray.toProtobufStreamReader(content);
+    while (!top.atEnd()) {
+        switch (top.fieldNumber()) {
+            case 1:
+                let level1 = top.readSubMessage();
+                while (!level1.atEnd()) {
+                    switch (level1.fieldNumber()) {
+                        case 1:
+                            res.reservationNumber = level1.readVarintField() + "";
+                            break;
+                        case 2:
+                            let tripData = level1.readSubMessage();
+                            while (!tripData.atEnd()) {
+                                switch (tripData.fieldNumber()) {
+                                    case 1:
+                                        let ticketNameData = tripData.readSubMessage();
+                                        while (!ticketNameData.atEnd()) {
+                                            switch (ticketNameData.fieldNumber()) {
+                                                case 2:
+                                                    res.reservedTicket.name = ticketNameData.readString();
+                                                    break;
+                                                default:
+                                                    ticketNameData.skip();
+                                            }
+                                        }
+                                        break;
+                                    case 2:
+                                        res.reservationFor.departureStation.name = tripData.readString();
+                                        break;
+                                    case 3:
+                                        res.reservationFor.arrivalStation.name = tripData.readString();
+                                        break;
+                                    case 4:
+                                        res.reservedTicket.ticketedSeat.seatingType = tripData.readVarintField() + "";
+                                    case 8:
+                                        res.reservationFor.departureTime = readTime(tripData);
+                                        break;
+                                    case 9:
+                                        res.reservationFor.arrivalTime = readTime(tripData);
+                                        break;
+                                    default:
+                                        tripData.skip();
+                                }
+                            }
+                            break;
+                        case 3:
+                            let travelerData = level1.readSubMessage();
+                            while (!travelerData.atEnd()) {
+                                switch (travelerData.fieldNumber()) {
+                                    case 3:
+                                        res.underName.givenName = travelerData.readString();
+                                        break;
+                                    case 4:
+                                        res.underName.familyName = travelerData.readString();
+                                        break;
+                                    case 7:
+                                        res.programMembershipUsed.programName = travelerData.readString();
+                                    default:
+                                        travelerData.skip();
+                                }
+                            }
+                            break;
+                        case 6:
+                            let paymentData = level1.readSubMessage();
+                            while (!paymentData.atEnd()) {
+                                switch (paymentData.fieldNumber()) {
+                                    case 2:
+                                        res.priceCurrency = paymentData.readString();
+                                        break;
+                                    case 3:
+                                        res.totalPrice = paymentData.readString();
+                                        break;
+                                    default:
+                                        paymentData.skip();
+                                }
+                            }
+                        case 8:
+                            let trainData = level1.readSubMessage();
+                            while (!trainData.atEnd()) {
+                                switch (trainData.fieldNumber()) {
+                                    case 11:
+                                        if (res.reservationFor.trainNumber)
+                                            res.reservationFor.trainNumber += ', '
+                                        else
+                                            res.reservationFor.trainNumber = ''
+                                        res.reservationFor.trainNumber += trainData.readString();
+                                        break;
+                                    case 12:
+                                        res.reservedTicket.ticketedSeat.seatSection = trainData.readString();
+                                        break;
+                                    case 13:
+                                        res.reservedTicket.ticketedSeat.seatNumber = trainData.readString();
+                                        break;
+                                    default:
+                                        trainData.skip();
+                                }
+                            }
+                            break;
+                        default:
+                            level1.skip();
+                    }
+                }
+                break;
+            default:
+                top.skip();
+        }
+    }
+
+    // convert unbound tickets
+    if (!res.reservationFor.trainNumber) {
+        res.reservedTicket.validFrom = res.reservationFor.departureTime;
+        res.reservedTicket.validUntil = res.reservationFor.arrivalTime;
+        res.reservationFor.departureDay = res.reservationFor.departureTime;
+        res.reservationFor.departureTime = undefined;
+        res.reservationFor.arrivalTime = undefined;
+    }
+
+    // convert unbound passes to a Ticket
+    if (!res.reservationFor.departureStation.name) {
+        res.reservedTicket.underName = res.underName;
+        res.reservedTicket.ticketNumber = res.reservationNumber;
+        return res.reservedTicket;
+    }
+
+    return res;
+}
+
+function parsePdfItinerary(pdf, node)
+{
+    const text = pdf.text;
+
+    let idx = 0;
+    let reservations = node.result;
+    while (true) {
+        const leg = text.substr(idx).match(/\((.*)\)\n(\S.*\S)  +\S\S., (\d{2}\.\d{2}.\d{4})  +ab (\d\d:\d\d) Uhr(?:  +Gleis (\S.*))?\n(\S.*\S)  +\S\S., (\d{2}\.\d{2}.\d{4})  +an (\d\d:\d\d) Uhr(?:  +Gleis (\S.*))?\n/);
+        if (!leg)
+            break
+        idx += leg.index + leg[0].length;
+
+        let res = JsonLd.newTrainReservation();
+        res.reservationFor.trainNumber = leg[1];
+        res.reservationFor.departureStation.name = leg[2];
+        res.reservationFor.departureTime = JsonLd.toDateTime(leg[3] + leg[4], 'dd.MM.yyyyhh:mm', 'de');
+        res.reservationFor.departurePlatform = leg[5];
+        res.reservationFor.arrivalStation.name = leg[6];
+        res.reservationFor.arrivalTime = JsonLd.toDateTime(leg[7] + leg[8], 'dd.MM.yyyyhh:mm', 'de');
+        res.reservationFor.arrivalPlatform = leg[9];
+        reservations.push(res);
+    }
+
+    return reservations;
+}

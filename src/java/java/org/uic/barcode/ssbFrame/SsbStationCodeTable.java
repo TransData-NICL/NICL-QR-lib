@@ -1,0 +1,21 @@
+package org.uic.barcode.ssbFrame;
+
+public enum SsbStationCodeTable {
+
+	UNKNOWN_0,
+	NRT,
+	RESERVATION,
+	UNKNOWN_3,
+	UNKNOWN_4,
+	UNKNOWN_5,
+	UNKNOWN_6,
+	UNKNOWN_7,
+	UNKNOWN_8,
+	UNKNOWN_9,
+	UNKNOWN_10,
+	UNKNOWN_11,
+	UNKNOWN_12,
+	UNKNOWN_13,
+	UNKNOWN_14,
+	UNKNOWN_15;
+}

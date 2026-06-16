@@ -1,0 +1,85 @@
+[
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "ticketonline@b-rail.be",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            },
+            {
+                "match": "^[A-Z0-9][A-Z0-9-]{14}$",
+                "mimeType": "text/plain",
+                "scope": "Descendants"
+            }
+        ],
+        "function": "parsePdf",
+        "script": "sncb.js",
+        "mimeType": "application/pdf"
+    },
+    {
+        "filter": [
+            {
+                "field": "carrierId",
+                "match": "1088",
+                "mimeType": "internal/uic9183",
+                "scope": "Descendants"
+            }
+        ],
+        "function": "parseInternationalPdf",
+        "mimeType": "application/pdf",
+        "script": "sncb.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "@b-europe.com|b-rail.be|belgiantrain.be",
+                "mimeType": "message/rfc822",
+                "scope": "Parent"
+            }
+        ],
+        "function": "extractFullImage",
+        "mimeType": "internal/qimage",
+        "script": "generic.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "@b-europe.com|b-rail.be|belgiantrain.be",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            }
+        ],
+        "function": "extractEmailBody",
+        "mimeType": "text/plain",
+        "script": "sncb.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "@b-europe.com|b-rail.be|belgiantrain.be",
+                "mimeType": "message/rfc822",
+                "scope": "Current"
+            }
+        ],
+        "function": "mergeEmail",
+        "mimeType": "message/rfc822",
+        "script": "sncb.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "carrierId",
+                "match": "1088",
+                "mimeType": "internal/uic9183",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseRct2",
+        "mimeType": "internal/uic9183",
+        "script": "sncb.js"
+    }
+]

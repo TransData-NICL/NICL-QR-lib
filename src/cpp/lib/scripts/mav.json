@@ -1,0 +1,69 @@
+[
+    {
+        "filter": [
+            {
+                "match": "^\\x04\\x03\\x1f\\x8b",
+                "mimeType": "application/octet-stream",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseBarcode",
+        "mimeType": "application/octet-stream",
+        "script": "mav.js"
+    },
+    {
+        "filter": [
+            {
+                "match": "^.\\01[\\dA-Z]{17}\\x001155",
+                "mimeType": "application/octet-stream",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseBarcodeAlternative",
+        "mimeType": "application/octet-stream",
+        "script": "mav.js"
+    },
+    {
+        "filter": [
+            {
+                "match": "^\\x04\\x03\\x1f\\x8b",
+                "mimeType": "application/octet-stream",
+                "scope": "Descendants"
+            },
+            {
+                "match": "^.\\01[\\dA-Z]{17}\\x001155",
+                "mimeType": "application/octet-stream",
+                "scope": "Descendants"
+            }
+        ],
+        "function": "parseTicket",
+        "mimeType": "application/pdf",
+        "script": "mav.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "carrierId",
+                "match": "1155",
+                "mimeType": "internal/uic9183",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseInternationalUic9183",
+        "mimeType": "internal/uic9183",
+        "script": "mav.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "carrierId",
+                "match": "1155",
+                "mimeType": "internal/uic9183",
+                "scope": "Descendants"
+            }
+        ],
+        "function": "parseInternationalTicket",
+        "mimeType": "application/pdf",
+        "script": "mav.js"
+    }
+]

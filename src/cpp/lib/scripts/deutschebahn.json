@@ -1,0 +1,181 @@
+[
+    {
+        "filter": [
+            {
+                "field": "carrierId",
+                "match": "80",
+                "mimeType": "internal/uic9183",
+                "scope": "Descendants"
+            },
+            {
+                "field": "carrierId",
+                "match": "1080",
+                "mimeType": "internal/uic9183",
+                "scope": "Descendants"
+            },
+            {
+                "field": "issuerId",
+                "match": "6061",
+                "mimeType": "internal/vdv",
+                "scope": "Descendants"
+            },
+            {
+                "field": "issuerId",
+                "match": "6260",
+                "mimeType": "internal/vdv",
+                "scope": "Descendants"
+            }
+        ],
+        "function": "parsePdf",
+        "mimeType": "application/pdf",
+        "script": "deutschebahn.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "buchungsbestaetigung@bahn.de",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            },
+            {
+                "field": "From",
+                "match": "noreply@deutschebahn.com",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            }
+        ],
+        "function": "parseReservation",
+        "mimeType": "application/pdf",
+        "script": "deutschebahn.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "UNITTEST-buchungsbestaetigung@bahn.de",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            }
+        ],
+        "function": "parseText",
+        "mimeType": "text/plain",
+        "script": "deutschebahn.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "From",
+                "match": "buchungsbestaetigung@bahn.de|noreply@deutschebahn.com",
+                "mimeType": "message/rfc822",
+                "scope": "Ancestors"
+            }
+        ],
+        "function": "parseCancellation",
+        "mimeType": "text/html",
+        "script": "deutschebahn.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "carrierId",
+                "match": "80",
+                "mimeType": "internal/uic9183",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseUic9183",
+        "mimeType": "internal/uic9183",
+        "script": "deutschebahn.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "uid",
+                "match": "^\\S{36}@bahn.de$",
+                "mimeType": "internal/event",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseReservationEvent",
+        "mimeType": "internal/event",
+        "script": "deutschebahn.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "uid",
+                "match": "^bahn\\d{14}$",
+                "mimeType": "internal/event",
+                "scope": "Current"
+            },
+            {
+                "field": "uid",
+                "match": "^\\d{14}@hafas$",
+                "mimeType": "internal/event",
+                "scope": "Current"
+            },
+            {
+                "field": "uid",
+                "match": "^\\S{36}@bahn.de$",
+                "mimeType": "internal/event",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseEvent",
+        "mimeType": "internal/event",
+        "script": "deutschebahn.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "carrierId",
+                "match": "2080",
+                "mimeType": "internal/uic9183",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseDBRegioBusUic",
+        "mimeType": "internal/uic9183",
+        "script": "deutschebahn.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "url",
+                "match": "^https://fahrkarten.bahn.de/mobile/dbc/xs.go",
+                "mimeType": "internal/http-response",
+                "scope": "Parent"
+            }
+        ],
+        "function": "parseOnlineTicket",
+        "mimeType": "text/html",
+        "script": "deutschebahn-online-ticket.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "carrierId",
+                "match": "80",
+                "mimeType": "internal/uic9183",
+                "scope": "Current"
+            }
+        ],
+        "function": "parseDBRegioNVUic",
+        "mimeType": "internal/uic9183",
+        "script": "deutschebahn.js"
+    },
+    {
+        "filter": [
+            {
+                "field": "url",
+                "match": "^https://int.bahn.de/web/api/angebote/verbindung",
+                "mimeType": "internal/http-response",
+                "scope": "Parent"
+            }
+        ],
+        "function": "parseConnectionShare",
+        "mimeType": "application/ld+json",
+        "script": "deutschebahn-online-ticket.js"
+    }
+]

@@ -1,0 +1,20 @@
+[{
+    "mimeType": "text/plain",
+    "filter": [
+        { "field": "From", "match": "noreply@klm.com", "mimeType": "message/rfc822", "scope": "Ancestors" }
+    ],
+    "script": "klm.js"
+},
+{
+    "filter": [
+        {
+            "field": "airlineDesignatorOfBoardingPassIssuer",
+            "match": "KL",
+            "mimeType": "internal/iata-bcbp",
+            "scope": "Descendants"
+        }
+    ],
+    "function": "extractBoardingPass",
+    "mimeType": "application/pdf",
+    "script": "klm.js"
+}]

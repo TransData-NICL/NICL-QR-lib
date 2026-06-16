@@ -1,0 +1,34 @@
+[
+    {
+        "mimeType": "internal/era-ssb",
+        "filter": [
+            { "mimeType": "internal/era-ssb", "field": "issuerCode", "match": "83", "scope": "Current" }
+        ],
+        "script": "trenitalia.js",
+        "function": "parseSsb"
+    },
+    {
+        "mimeType": "application/pdf",
+        "filter": [
+            { "mimeType": "text/plain", "match": "www.trenitalia.com", "scope": "Descendants" }
+        ],
+        "script": "trenitalia.js",
+        "function": "parsePdf"
+    },
+    {
+        "mimeType": "internal/event",
+        "filter": [
+            { "mimeType": "internal/event", "field": "organizer.email", "match": "webmaster@trenitalia.it", "scope": "Current" }
+        ],
+        "script": "trenitalia.js",
+        "function": "parseEvent"
+    },
+    {
+        "mimeType": "text/html",
+        "filter": [
+            { "mimeType": "message/rfc822", "field": "From", "match": "webmaster@trenitalia.it", "scope": "Ancestors" }
+        ],
+        "script": "trenitalia.js",
+        "function": "parseHtml"
+    }
+]
